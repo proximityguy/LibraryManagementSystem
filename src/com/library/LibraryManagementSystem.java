@@ -44,17 +44,28 @@ class Books
 
 //	to display book object one by one
 	public void displayBookDetails() {		
-		System.out.println("Id: " + getBookId() + "\n" 
+		System.out.println("__________________ \n"
+						 + "Id: " + getBookId() + "\n" 
 						 + "Title: " + getTitle() + "\n" 
 						 + "Author: " + getAuthor() + "\n"
 						 + "Copies: " + getBookCopies());
 	}
 	
-//	to  search book object from array of books by using Id, it will return the very book object
+//	to search book object from array of books by using Id, it will return that very book object
 	public static Books searchBookById(Books[] bookArray, String id) {
 		for (Books book : bookArray) {
 			if(book != null && book.getBookId().equals(id))
 				return book;
+		}
+		return null;
+	}
+	
+//	to search a book by its title
+	public static Books searchBookByTitle(Books[] bookArray, String name) {
+		for (Books book : bookArray) {
+			if(book.getTitle().equalsIgnoreCase(name.trim())) {
+				return book;
+			}
 		}
 		return null;
 	}
@@ -75,7 +86,8 @@ class Books
 }
 
 //	class Users begins here	->
-class Users {
+class Users 
+{
 	private String userId;
 	private String userName;
 
@@ -95,21 +107,55 @@ class Users {
 		this.userName = userName;
 	}
 
-
-	void displayUserDetails() {
-		System.out.println("Id: " + getUserId() + "\n" 
-						 + "name: " + getUserName() + "\n");
+//	to display user object one by one
+	public void displayUserDetails() {
+		System.out.println("__________________\n"
+						 + "Id: " + getUserId() + "\n" 
+						 + "name: " + getUserName());
+	}
+	
+//	to  search user object from array of users by using Id, it will return that very user object
+	public static Users searchUserById(Users[] userArray, String id) {
+		for (Users user : userArray) {
+			if(user != null && user.getUserId().equals(id)) {
+				return user;
+			}
+		}
+		return null;
+	}
+	
+//	to delete a book object from the bookArray using Id, it will return a new array
+	public static Users[] deleteUser(Users[] userArray, Users userToDelete) {
+		Users[] resultArray = new Users[userArray.length - 1];
+		
+		int k = 0;
+		for (int i = 0; i < resultArray.length; i++) {
+			if(userArray[i] == userToDelete) continue;
+			resultArray[k] = userArray[i];
+			k++;
+		}
+		return resultArray;
 	}
 
+}
+
+//	class Library begins here
+class Library
+{
+	
 }
 
 //	main class LibraryManagementSystem begins here	->
 public class LibraryManagementSystem 
 {
-	static Books[] bookArray = new Books[20];
-	static Users[] userArray = new Users[20];
+	final static int libraryCapacity = 20;
+	final static int userLimit = 100;
+	
+	static Books[] bookArray = new Books[libraryCapacity];
+	static Users[] userArray = new Users[userLimit];
 	static int bookCount = 0;
 	static int userCount = 0;
+	
 
 	public static void main(String[] args) {
 
@@ -145,13 +191,12 @@ public class LibraryManagementSystem
 //		inner switch of book module ->
 					switch (bookChoice) {
 					case 1:
-						System.out.println("add book method running");
 
-						if (bookCount < 20) {
-							bookArray[bookCount] = new Books();		//	bookArray is created here
+						if (bookCount < libraryCapacity) {
+//							one book object element in the bookArray is created here
+							bookArray[bookCount] = new Books();		
 
 							System.out.println("enter book id: ");
-//							sc.nextLine();
 							String id = sc.nextLine();
 							bookArray[bookCount].setBookId(id);
 
@@ -167,32 +212,34 @@ public class LibraryManagementSystem
 							short copies = sc.nextShort();
 							sc.nextLine();
 							bookArray[bookCount].setBookCopies(copies);
+							
+							System.err.println(title + " book is added to the library...");
 							bookCount++;
 							
 						} else {
 							System.err.println("book self is full... \n"
-											 + "can not add more books.!");
+											 + "can not add more new books...!");
 						}
-						break;	//	break for outer new switch
+						break;
 
 					case 2:
-						System.err.println("List of all books \n"
-										 + "------------------");
+						System.err.println("List of all books");
+						
 						if(bookCount < 1) {
-							System.err.println("no books in the library.. \n"
+							System.err.println("library is empty... \n"
 											 + "add new books to the library");
 							break;
 						}
 						
+
 						for (int i = 0; i < bookCount; i++) {
 							bookArray[i].displayBookDetails();
-							System.err.println("------------------");
 						}
-\						break;
+						break;
 
 					case 3:
 						if(bookCount < 1) {
-							System.err.println("library is empty..."
+							System.err.println("library is empty... \n"
 											 + "add new books to the library");
 							break;
 						}
@@ -200,13 +247,11 @@ public class LibraryManagementSystem
 						System.out.println("search book by id \n"
 										 + "enter book id: ");
 						String searchId = sc.nextLine();
-						System.out.println("count - " + bookCount); // ^^^^^^^^^^^^^^^^
+						
 						Books bookFound = Books.searchBookById(bookArray, searchId);
-						System.out.println("count - " + bookCount); // ^^^^^^^^^^^^^^^^
+						
 						if(bookFound != null) {
-							System.err.println("------------------");
 							bookFound.displayBookDetails();
-							System.err.println("------------------");
 						} else {
 							System.err.println("no such book id exists...");
 						}
@@ -214,22 +259,26 @@ public class LibraryManagementSystem
 						
 					case 4:
 						if(bookCount < 1) {
-							System.err.println("library is empty..."
+							System.err.println("library is empty... \n"
 											 + "add new books to the library");
 							break;
 						}
 						
 						System.out.println("to remove book \n"
-										 + "enter the book's ID to remove: ");
+										 + "enter the book's ID: ");
 						String deleteId = sc.nextLine();
-						Books bookToDelete = Books.searchBookById(bookArray, deleteId);
 						
+//						searching the book
+						Books bookToDelete = Books.searchBookById(bookArray, deleteId);
 						if(bookToDelete == null) {
 							System.err.println("no such book id exists...");
 							break;
 						}
+						
+//						if book found, deleting the book
 						bookArray = Books.deleteBook(bookArray, bookToDelete);
-						System.err.println("book id " + deleteId + " deleted...");
+						System.err.println("book id " + bookToDelete.getBookId() + "\n"
+										  + bookToDelete.getTitle() + " deleted...");
 						bookCount--;
 						break;
 
@@ -242,39 +291,112 @@ public class LibraryManagementSystem
 										 + "enter a valid choice...! \n"
 										 + "returning to Main Menu... :)");
 						break;
-
 					}
+					
 					break;	//	break for outer main switch
 
 //		case 2 -> module user
 			case 2:
 				System.out.println(
 						"1. add user \n"  
-					  + "2. view all users \n" 
-					  + "3. remove user \n"
-					  + "4. Exit the application \n" 
+					  + "2. view all users \n"
+					  + "3. view user by ID \n" 
+					  + "4. remove user \n"
+					  + "5. Exit the application \n" 
 					  + "Enter choice : ");
 
 				short userChoice = sc.nextShort();
-				System.out.println("your choice in user module : " + userChoice);
+				sc.nextLine();
+
 //				inner switch of user module	->
 				switch (userChoice) {
 				case 1:
 					
-					break;
-				case 2:
+					if(userCount < userLimit) {
+//						one user object element in the userArray is created here
+						userArray[userCount] = new Users();
+						
+						System.out.println("enter user id: ");
+						String id = sc.nextLine();
+						userArray[userCount].setUserId(id);
+						
+						System.out.println("enter user name: ");
+						String name = sc.nextLine();
+						userArray[userCount].setUserName(name);
+						
+						System.err.println("a new user is added");
+						userCount++;
+					} else {
+						System.err.println("user limit is full... \n"
+								 + "can not add more users...!");
+					}
 					
 					break;
+				case 2:
+					System.err.println("List of all users");
+
+					if(userCount < 1) {
+						System.err.println("no users exist... \n"
+											 + "add new users to use library...!");
+						break;
+					}
+						
+
+					for (int i = 0; i < userCount; i++) {
+						userArray[i].displayUserDetails();
+					}								
+					break;
 				case 3:
+					if(userCount < 1) {
+						System.err.println("no users exist... \n"
+										 + "add new users to use library...!");
+						break;
+					}
+					
+					System.out.println("search user by ID \n"
+									 + "enter user id: ");
+					String searchId = sc.nextLine();
+					Users userFound = Users.searchUserById(userArray, searchId);
+					
+					if(userFound != null) {
+						userFound.displayUserDetails();
+					} else {
+						System.out.println("no such user id exists...");
+					}
+					
 					break;
 				case 4:
+					if(userCount < 1) {
+						System.err.println("userList is empty... \n"
+										 + "add new users to the library");
+						break;
+					}
+					
+					System.out.println("to remove user \n"
+									 + "enter the user's ID: ");
+					String deleteId = sc.nextLine();
+					
+//					searching the user
+					Users userToDelete = Users.searchUserById(userArray, deleteId);
+					if(userToDelete == null) {
+						System.err.println("no such user id exists...");
+						break;
+					}
+					
+//					if user found, deleting the user
+					userArray = Users.deleteUser(userArray, userToDelete);
+					System.err.println("user id " + userToDelete.getUserId() + "\n"
+									  + userToDelete.getUserName() + " deleted...");
+					userCount--;
+					break;
+				case 5:
 					System.err.println("Exiting the application... :)");
 					System.exit(0);
 
 				default:
 					System.err.println("invalid choice in book module... :( \n"
-							 + "enter a valid choice...! \n"
-							 + "returning to Main Menu... :)");
+							 		 + "enter a valid choice...! \n"
+							 		 + "returning to Main Menu... :)");
 					break;
 				}
 				break;	//	break for outer main switch
@@ -289,7 +411,50 @@ public class LibraryManagementSystem
 					  + "Enter choice : ");
 
 				short libraryChoice = sc.nextShort();
-				System.out.println("your choice in library module : " + libraryChoice);
+				sc.nextLine();
+				
+				switch (libraryChoice) {
+				case 1:
+					System.out.println("enter book id: ");
+					String bookId = sc.nextLine();
+					System.out.println("enter user id: ");
+					String userId = sc.nextLine();
+					
+					
+					break;
+				case 2:
+					
+					break;
+				case 3:
+					if(bookCount < 1) {
+						System.err.println("library is empty... \n"
+										 + "add new books to the library");
+						break;
+					}
+					
+					System.out.println("enter name of book: ");
+					String name = sc.nextLine();
+					
+//					searching for book
+					Books bookFound = Books.searchBookByTitle(bookArray, name);
+					
+					if(bookFound != null) {
+						bookFound.displayBookDetails();
+					} else {
+						System.err.println("no such book id exists...");
+					}
+					break;
+				case 4:
+					System.err.println("Exiting the application... :)");
+					System.exit(0);
+					
+				default:
+					System.err.println("invalid choice in library module... :( \n"
+					 		 + "enter a valid choice...! \n"
+					 		 + "returning to Main Menu... :)");
+					break;
+				}
+
 				break;	//	break for outer main switch
 
 //		case 4 -> exit the application
